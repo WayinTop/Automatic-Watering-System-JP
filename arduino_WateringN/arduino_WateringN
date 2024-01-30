@@ -1,0 +1,36 @@
+// N-way plant Watering System
+// refactored by T. Endo 2024.1.24
+
+#define Interval 1000
+#define On LOW
+#define Off HIGH
+#define END (-1)
+const char* Header = "MOISTURE LEVEL:";
+int MoistLevel = 750; // ajustable by adding some code.
+// refactored to make Sensors and Pumps appendable before END.
+const int Sensor[] = {A0, A1, A2, A3, END};
+const int Pump[] = {4, 5, 6, 7, END};
+// note: pins 2 & 3 should be reserved for interrupt,
+// to add level adjustment functionality in the future
+// because only those pins are available to early Arduinos.
+
+void setup() {
+  Serial.begin(9600);
+  for (int i=0; Pump[i] != END; i++) {
+    pinMode(Sensor[i], INPUT);
+    pinMode(Pump[i], OUTPUT);
+    digitalWrite(Pump[i], Off);
+  }
+  delay(500);
+}
+void loop() {
+  Serial.print(Header);
+  for (int i = 0; Pump[i] != END; i++) {
+    int value1 = analogRead(Sensor[i]);
+    Serial.println(value1);
+    digitalWrite(Pump[i],  // higher as drier
+      (value1 > MoistLevel) ? On : Off ); 
+    Serial.println();
+  }
+  delay(Interval);
+}
